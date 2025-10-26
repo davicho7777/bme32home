@@ -1,0 +1,5 @@
+{
+  "/api/sensor-data/route": "app/api/sensor-data/route.js",
+  "/esp32/page": "app/esp32/page.js",
+  "/page": "app/page.js"
+}

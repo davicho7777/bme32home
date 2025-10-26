@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model SensorData {
+  id          String   @id @default(cuid())
+  deviceId    String
+  temperature Float
+  humidity    Float
+  pressure    Float
+  rssi        Int?
+  uptime      BigInt?
+  heapFree    Int?
+  lastError   String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([deviceId, createdAt])
+}
