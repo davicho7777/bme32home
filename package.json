@@ -10,11 +10,10 @@
     "vercel-build": "next build",
     "db:deploy": "prisma migrate deploy",
     "db:reset": "prisma migrate reset --force",
-  "db:studio": "prisma studio"
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
-    "@prisma/client": "^6.18.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.460.0",
@@ -32,7 +31,6 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.1.0",
     "postcss": "^8.4.49",
-    "prisma": "^6.18.0",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3"
   }
