@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import type { Prisma } from '@prisma/client'
+import { createClient } from '@supabase/supabase-js'
+// Crear cliente de Supabase para uso en server-side (API route)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,36 +20,43 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    const record = await prisma.sensorData.create({
-      data: {
-        deviceId: String(device_id),
-        temperature: parseFloat(temperature),
-        humidity: parseFloat(humidity),
-        pressure: parseFloat(pressure),
-        rssi: rssi !== undefined ? parseInt(rssi) : null,
-        uptime: uptime !== undefined ? BigInt(uptime) : null,
-        heapFree: heap_free !== undefined ? parseInt(heap_free) : (heapFree !== undefined ? parseInt(heapFree) : null),
-        lastError: last_error !== undefined ? String(last_error) : (lastError !== undefined ? String(lastError) : null),
-      }
-    })
+    // Insertar en Supabase
+    const { data, error } = await supabase
+      .from('sensor_data')
+      .insert([
+        {
+          device_id: String(device_id),
+          temperature: parseFloat(temperature),
+          humidity: parseFloat(humidity),
+          pressure: parseFloat(pressure),
+          rssi: rssi !== undefined ? parseInt(rssi) : null,
+          uptime: uptime !== undefined ? Number(uptime) : null,
+          heap_free: heap_free !== undefined ? parseInt(heap_free) : (heapFree !== undefined ? parseInt(heapFree) : null),
+          last_error: last_error !== undefined ? String(last_error) : (lastError !== undefined ? String(lastError) : null),
+        }
+      ])
+      .select()
+      .single()
 
-    console.log('Datos recibidos del ESP32:', record)
-
+    if (error) {
+      console.error('Error insertando en Supabase:', error)
+      return NextResponse.json({ error: 'Error al guardar en Supabase', details: error.message }, { status: 500 })
+    }
 
     return NextResponse.json(
       {
         message: 'Datos recibidos correctamente',
         data: {
-          id: record.id,
-          device_id: record.deviceId,
-          temperature: record.temperature,
-          humidity: record.humidity,
-          pressure: record.pressure,
-          rssi: record.rssi,
-          uptime: record.uptime != null ? Number(record.uptime) : null,
-          heapFree: record.heapFree,
-          lastError: record.lastError,
-          timestamp: record.createdAt,
+          id: data.id,
+          device_id: data.device_id,
+          temperature: data.temperature,
+          humidity: data.humidity,
+          pressure: data.pressure,
+          rssi: data.rssi,
+          uptime: data.uptime,
+          heapFree: data.heap_free,
+          lastError: data.last_error,
+          timestamp: data.created_at,
         }
       },
       { status: 200 }
@@ -74,6 +85,12 @@ export async function GET(request: NextRequest) {
     if (device_id) where.deviceId = device_id
 
     // Determinar ventana de tiempo
+
+    // Construir filtros para Supabase
+    let query = supabase.from('sensor_data').select('*').order('created_at', { ascending: false }).limit(limit)
+    if (device_id) query = query.eq('device_id', device_id)
+
+    // Filtros de tiempo
     let fromDate: Date | undefined
     let toDate: Date | undefined
     const now = new Date()
@@ -94,43 +111,36 @@ export async function GET(request: NextRequest) {
         fromDate = d
       }
     }
-    if (fromDate || toDate) {
-      where.createdAt = {}
-      if (fromDate) where.createdAt.gte = fromDate
-      if (toDate) where.createdAt.lte = toDate
-    }
+    if (fromDate) query = query.gte('created_at', fromDate.toISOString())
+    if (toDate) query = query.lte('created_at', toDate.toISOString())
 
-    // Si se solicita validación, filtrar por rangos plausibles en base de datos
+    // Validación de rangos plausibles
     if (validated && ['true', '1', 'yes'].includes(validated.toLowerCase())) {
-      where.AND = [
-        { temperature: { gt: -40, lt: 85 } },
-        { humidity: { gte: 0, lte: 100 } },
-        { pressure: { gt: 300, lt: 1100 } },
-      ]
+      query = query.gte('temperature', -40).lte('temperature', 85)
+        .gte('humidity', 0).lte('humidity', 100)
+        .gte('pressure', 300).lte('pressure', 1100)
     }
 
-    const rows = await prisma.sensorData.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-    })
+    const { data, error } = await query
+    if (error) {
+      console.error('Error consultando Supabase:', error)
+      return NextResponse.json({ error: 'Error consultando Supabase', details: error.message }, { status: 500 })
+    }
 
-
-    const data = rows.map((r: any) => ({
+    const mapped = (data ?? []).map((r: any) => ({
       id: r.id,
-      device_id: r.deviceId,
+      device_id: r.device_id,
       temperature: r.temperature,
       humidity: r.humidity,
       pressure: r.pressure,
       rssi: r.rssi,
-      uptime: r.uptime != null ? Number(r.uptime) : null,
-      heapFree: r.heapFree,
-      lastError: r.lastError,
-      timestamp: r.createdAt,
+      uptime: r.uptime,
+      heapFree: r.heap_free,
+      lastError: r.last_error,
+      timestamp: r.created_at,
     }))
 
-    return NextResponse.json(data, { status: 200 })
-
+    return NextResponse.json(mapped, { status: 200 })
   } catch (error) {
     console.error('Error obteniendo datos del sensor:', error)
     return NextResponse.json(
@@ -143,35 +153,73 @@ export async function GET(request: NextRequest) {
 // Endpoint para obtener estadísticas
 export async function HEAD(request: NextRequest) {
   try {
-    const totalRecords = await prisma.sensorData.count()
-    const devicesRows: { deviceId: string }[] = await prisma.sensorData.findMany({
-      distinct: ['deviceId'],
-      select: { deviceId: true },
-    })
-    const latest = await prisma.sensorData.findFirst({ orderBy: { createdAt: 'desc' } })
-    const oldest = await prisma.sensorData.findFirst({ orderBy: { createdAt: 'asc' } })
+
+    // Total de registros
+    const { count: totalRecords, error: countError } = await supabase
+      .from('sensor_data')
+      .select('*', { count: 'exact', head: true })
+    if (countError) {
+      console.error('Error contando registros:', countError)
+      return NextResponse.json({ error: 'Error contando registros', details: countError.message }, { status: 500 })
+    }
+
+    // Dispositivos únicos
+    const { data: devicesRows, error: devicesError } = await supabase
+      .from('sensor_data')
+      .select('device_id')
+      .neq('device_id', null)
+      .order('device_id', { ascending: true })
+    if (devicesError) {
+      console.error('Error obteniendo dispositivos:', devicesError)
+      return NextResponse.json({ error: 'Error obteniendo dispositivos', details: devicesError.message }, { status: 500 })
+    }
+    const devices = Array.from(new Set((devicesRows ?? []).map((d: any) => d.device_id)))
+
+    // Último registro
+    const { data: latestArr, error: latestError } = await supabase
+      .from('sensor_data')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1)
+    if (latestError) {
+      console.error('Error obteniendo último registro:', latestError)
+      return NextResponse.json({ error: 'Error obteniendo último registro', details: latestError.message }, { status: 500 })
+    }
+    const latest = latestArr && latestArr.length > 0 ? latestArr[0] : null
+
+    // Primer registro
+    const { data: oldestArr, error: oldestError } = await supabase
+      .from('sensor_data')
+      .select('*')
+      .order('created_at', { ascending: true })
+      .limit(1)
+    if (oldestError) {
+      console.error('Error obteniendo primer registro:', oldestError)
+      return NextResponse.json({ error: 'Error obteniendo primer registro', details: oldestError.message }, { status: 500 })
+    }
+    const oldest = oldestArr && oldestArr.length > 0 ? oldestArr[0] : null
 
     return NextResponse.json({
       totalRecords,
-  devices: devicesRows.map((d: any) => d.deviceId),
+      devices,
       latestData: latest
         ? {
             id: latest.id,
-            device_id: latest.deviceId,
+            device_id: latest.device_id,
             temperature: latest.temperature,
             humidity: latest.humidity,
             pressure: latest.pressure,
-            timestamp: latest.createdAt,
+            timestamp: latest.created_at,
           }
         : null,
       oldestData: oldest
         ? {
             id: oldest.id,
-            device_id: oldest.deviceId,
+            device_id: oldest.device_id,
             temperature: oldest.temperature,
             humidity: oldest.humidity,
             pressure: oldest.pressure,
-            timestamp: oldest.createdAt,
+            timestamp: oldest.created_at,
           }
         : null,
     }, { status: 200 })
