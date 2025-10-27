@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { Download } from 'lucide-react'
 import { format } from 'date-fns'
 import { Thermometer, Droplets, Gauge, Wifi, Activity, AlertTriangle, Calendar as CalendarIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -25,6 +26,36 @@ export default function Dashboard() {
   const [isConnected, setIsConnected] = useState(false)
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<TimeRange>('6h')
+
+  const [showCsvMenu, setShowCsvMenu] = useState<boolean>(false)
+  const [csvLoading, setCsvLoading] = useState<boolean>(false)
+  // Descarga CSV para el periodo seleccionado
+  const handleDownloadCsv = async (range: TimeRange) => {
+    setCsvLoading(true)
+    setShowCsvMenu(false)
+    try {
+      const url = `/api/sensor-data?limit=10000&range=${range}`
+      const res = await fetch(url)
+      if (!res.ok) throw new Error('Error al obtener datos')
+      const data = await res.json()
+      if (!Array.isArray(data) || data.length === 0) throw new Error('Sin datos para exportar')
+      // Generar CSV
+      const header = Object.keys(data[0])
+      const rows = data.map((row: any) => header.map(h => row[h]))
+      const csv = [header.join(','), ...rows.map(r => r.join(','))].join('\r\n')
+      const blob = new Blob([csv], { type: 'text/csv' })
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `sensor-data-${range}.csv`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (e) {
+      alert('Error exportando CSV: ' + (e as any).message)
+    } finally {
+      setCsvLoading(false)
+    }
+  }
 
   
 
@@ -128,6 +159,32 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              {/* Botón de descarga CSV */}
+              <div className="relative">
+                <button
+                  className="flex items-center gap-1 px-3 py-2 rounded-md bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition font-medium"
+                  onClick={() => setShowCsvMenu(v => !v)}
+                  disabled={csvLoading}
+                  title="Descargar CSV"
+                >
+                  <Download className="w-4 h-4" />
+                  CSV
+                </button>
+                {showCsvMenu && (
+                  <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded shadow z-10 min-w-[120px]">
+                    {rangeButtons.map(({ key, label }) => (
+                      <button
+                        key={key}
+                        className="block w-full text-left px-4 py-2 hover:bg-yellow-50 text-sm"
+                        onClick={() => handleDownloadCsv(key)}
+                        disabled={csvLoading}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <Link href="/calendar">
                 <button className="flex items-center gap-1 px-3 py-2 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 transition font-medium">
                   <CalendarIcon className="w-4 h-4" />

@@ -1,7 +1,5 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
   "/api/sensor-data/route": "app/api/sensor-data/route.js",
-  "/calendar/page": "app/calendar/page.js",
   "/page": "app/page.js",
-  "/esp32/page": "app/esp32/page.js"
+  "/calendar/page": "app/calendar/page.js"
 }
