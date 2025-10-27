@@ -3,8 +3,10 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Use a direct (non-pooled) connection for migrations. Set DIRECT_URL in .env to the 5432 connection.
+  directUrl = env("DIRECT_URL")
 }
 
 model SensorData {

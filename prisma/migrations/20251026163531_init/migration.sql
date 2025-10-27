@@ -1,12 +1,13 @@
+-- Prisma migration adjusted for PostgreSQL
 -- CreateTable
-CREATE TABLE "SensorData" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS "SensorData" (
+    "id" TEXT PRIMARY KEY,
     "deviceId" TEXT NOT NULL,
-    "temperature" REAL NOT NULL,
-    "humidity" REAL NOT NULL,
-    "pressure" REAL NOT NULL,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "temperature" DOUBLE PRECISION NOT NULL,
+    "humidity" DOUBLE PRECISION NOT NULL,
+    "pressure" DOUBLE PRECISION NOT NULL,
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- CreateIndex
-CREATE INDEX "SensorData_deviceId_created_at_idx" ON "SensorData"("deviceId", "created_at");
+CREATE INDEX IF NOT EXISTS "SensorData_deviceId_created_at_idx" ON "SensorData" ("deviceId", "created_at");

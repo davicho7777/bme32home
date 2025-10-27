@@ -216,6 +216,66 @@ curl -X POST http://localhost:3000/api/sensor-data \
 2. Configura las variables de entorno si es necesario
 3. Despliega automáticamente
 
+### Vercel + Supabase (DB y variables de entorno)
+
+Para producción, usa una base de datos externa (por ejemplo, Supabase Postgres) y configura las variables:
+
+1) En Vercel > Project > Settings > Environment Variables agrega:
+
+
+2) Localmente, copia `.env.example` a `.env.local` y completa `DATABASE_URL` si vas a correr migraciones.
+
+3) Si migras de SQLite a Postgres, en `prisma/schema.prisma` cambia el provider a `postgresql` y aplica migraciones:
+
+```bash
+npx prisma migrate deploy
+```
+
+4) En el código, el cliente de Supabase está centralizado en `src/lib/supabaseClient.ts` y usa las variables `NEXT_PUBLIC_*`.
+
+<!-- SQLite migration instructions removed: now only Supabase/Postgres is supported. -->
+### Migrar datos de SQLite (local) a Postgres (Supabase)
+
+Si ya tienes datos en SQLite y quieres llevarlos a Supabase:
+
+1) Asegúrate de tener la base local (por ejemplo `prisma/dev.db`) y crea un archivo `.env` con:
+
+```
+SQLITE_URL="file:./prisma/dev.db"
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DB?pgbouncer=true&connection_limit=1
+```
+
+2) Genera el cliente para SQLite y exporta datos a JSON:
+
+```bash
+npm run generate:sqlite
+npm run export:sqlite
+```
+
+3) Aplica migraciones en Postgres (si no lo hiciste):
+
+Nota: Para Prisma + Supabase, usa conexión directa (5432) para migraciones. Puedes poner
+`DIRECT_URL` en tu `.env` con la URL directa (5432) y dejar `DATABASE_URL` con la URL pooled (6543).
+El schema ya incluye `directUrl = env("DIRECT_URL")`.
+
+```bash
+npm run db:deploy
+```
+
+4) Importa los datos exportados en Postgres:
+
+```bash
+npm run import:postgres
+```
+
+También puedes ejecutar todo junto:
+
+```bash
+npm run migrate:from-sqlite
+```
+
+Los archivos involucrados:
+
 ### Docker
 
 ```dockerfile
