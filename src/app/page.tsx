@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { format } from 'date-fns'
 import { Thermometer, Droplets, Gauge, Wifi, Activity, AlertTriangle, Calendar as CalendarIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -26,11 +26,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<TimeRange>('6h')
 
-  useEffect(() => {
-    fetchSensorData()
-    const interval = setInterval(fetchSensorData, 30000) // Actualizar cada 30 segundos
-    return () => clearInterval(interval)
-  }, [timeRange])
+  
 
   // Filtro de valores atípicos/implausibles
   const isValidReading = (d: SensorData) => (
@@ -45,7 +41,7 @@ export default function Dashboard() {
     return filtered.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
   }, [sensorData])
 
-  const fetchSensorData = async () => {
+  const fetchSensorData = useCallback(async () => {
     try {
       let url = `/api/sensor-data?limit=500&validated=true`;
       if (timeRange === '10m') {
@@ -73,7 +69,13 @@ export default function Dashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [timeRange])
+
+  useEffect(() => {
+    fetchSensorData()
+    const interval = setInterval(fetchSensorData, 30000) // Actualizar cada 30 segundos
+    return () => clearInterval(interval)
+  }, [fetchSensorData])
 
   const rangeButtons: { key: TimeRange; label: string }[] = [
     { key: '10m', label: '10m' },

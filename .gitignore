@@ -21,6 +21,8 @@ Thumbs.db
 # Prisma
 prisma/dev.db
 prisma/*.db
+prisma/**/*.db
+*.db
 
 # VSCode
 .vscode/

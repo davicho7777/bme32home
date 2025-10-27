@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { randomUUID } from 'crypto'
 // Crear cliente de Supabase para uso en server-side (API route)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+// Usa Service Role para poder insertar/leer bajo RLS
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE!, { auth: { persistSession: false } })
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,19 +21,23 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    // Insertar en Supabase
+    // Generar id si la tabla lo requiere (no hay default en migración)
+  const id = (globalThis as any).crypto?.randomUUID?.() || randomUUID()
+
+    // Insertar en Supabase (tabla: SensorData, columnas camelCase)
     const { data, error } = await supabase
-      .from('sensor_data')
+      .from('SensorData')
       .insert([
         {
-          device_id: String(device_id),
+          id,
+          deviceId: String(device_id),
           temperature: parseFloat(temperature),
           humidity: parseFloat(humidity),
           pressure: parseFloat(pressure),
           rssi: rssi !== undefined ? parseInt(rssi) : null,
           uptime: uptime !== undefined ? Number(uptime) : null,
-          heap_free: heap_free !== undefined ? parseInt(heap_free) : (heapFree !== undefined ? parseInt(heapFree) : null),
-          last_error: last_error !== undefined ? String(last_error) : (lastError !== undefined ? String(lastError) : null),
+          heapFree: heap_free !== undefined ? parseInt(heap_free) : (heapFree !== undefined ? parseInt(heapFree) : null),
+          lastError: last_error !== undefined ? String(last_error) : (lastError !== undefined ? String(lastError) : null),
         }
       ])
       .select()
@@ -48,14 +53,14 @@ export async function POST(request: NextRequest) {
         message: 'Datos recibidos correctamente',
         data: {
           id: data.id,
-          device_id: data.device_id,
+          device_id: data.deviceId,
           temperature: data.temperature,
           humidity: data.humidity,
           pressure: data.pressure,
           rssi: data.rssi,
           uptime: data.uptime,
-          heapFree: data.heap_free,
-          lastError: data.last_error,
+          heapFree: data.heapFree,
+          lastError: data.lastError,
           timestamp: data.created_at,
         }
       },
@@ -87,8 +92,8 @@ export async function GET(request: NextRequest) {
     // Determinar ventana de tiempo
 
     // Construir filtros para Supabase
-    let query = supabase.from('sensor_data').select('*').order('created_at', { ascending: false }).limit(limit)
-    if (device_id) query = query.eq('device_id', device_id)
+  let query = supabase.from('SensorData').select('*').order('created_at', { ascending: false }).limit(limit)
+  if (device_id) query = query.eq('deviceId', device_id)
 
     // Filtros de tiempo
     let fromDate: Date | undefined
@@ -111,8 +116,8 @@ export async function GET(request: NextRequest) {
         fromDate = d
       }
     }
-    if (fromDate) query = query.gte('created_at', fromDate.toISOString())
-    if (toDate) query = query.lte('created_at', toDate.toISOString())
+  if (fromDate) query = query.gte('created_at', fromDate.toISOString())
+  if (toDate) query = query.lte('created_at', toDate.toISOString())
 
     // Validación de rangos plausibles
     if (validated && ['true', '1', 'yes'].includes(validated.toLowerCase())) {
@@ -129,14 +134,14 @@ export async function GET(request: NextRequest) {
 
     const mapped = (data ?? []).map((r: any) => ({
       id: r.id,
-      device_id: r.device_id,
+      device_id: r.deviceId,
       temperature: r.temperature,
       humidity: r.humidity,
       pressure: r.pressure,
       rssi: r.rssi,
       uptime: r.uptime,
-      heapFree: r.heap_free,
-      lastError: r.last_error,
+      heapFree: r.heapFree,
+      lastError: r.lastError,
       timestamp: r.created_at,
     }))
 
@@ -156,7 +161,7 @@ export async function HEAD(request: NextRequest) {
 
     // Total de registros
     const { count: totalRecords, error: countError } = await supabase
-      .from('sensor_data')
+      .from('SensorData')
       .select('*', { count: 'exact', head: true })
     if (countError) {
       console.error('Error contando registros:', countError)
@@ -165,19 +170,19 @@ export async function HEAD(request: NextRequest) {
 
     // Dispositivos únicos
     const { data: devicesRows, error: devicesError } = await supabase
-      .from('sensor_data')
-      .select('device_id')
-      .neq('device_id', null)
-      .order('device_id', { ascending: true })
+      .from('SensorData')
+      .select('deviceId')
+      .neq('deviceId', null)
+      .order('deviceId', { ascending: true })
     if (devicesError) {
       console.error('Error obteniendo dispositivos:', devicesError)
       return NextResponse.json({ error: 'Error obteniendo dispositivos', details: devicesError.message }, { status: 500 })
     }
-    const devices = Array.from(new Set((devicesRows ?? []).map((d: any) => d.device_id)))
+  const devices = Array.from(new Set((devicesRows ?? []).map((d: any) => d.deviceId)))
 
     // Último registro
     const { data: latestArr, error: latestError } = await supabase
-      .from('sensor_data')
+      .from('SensorData')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(1)
@@ -189,7 +194,7 @@ export async function HEAD(request: NextRequest) {
 
     // Primer registro
     const { data: oldestArr, error: oldestError } = await supabase
-      .from('sensor_data')
+      .from('SensorData')
       .select('*')
       .order('created_at', { ascending: true })
       .limit(1)
@@ -205,7 +210,7 @@ export async function HEAD(request: NextRequest) {
       latestData: latest
         ? {
             id: latest.id,
-            device_id: latest.device_id,
+            device_id: latest.deviceId,
             temperature: latest.temperature,
             humidity: latest.humidity,
             pressure: latest.pressure,
@@ -215,7 +220,7 @@ export async function HEAD(request: NextRequest) {
       oldestData: oldest
         ? {
             id: oldest.id,
-            device_id: oldest.device_id,
+            device_id: oldest.deviceId,
             temperature: oldest.temperature,
             humidity: oldest.humidity,
             pressure: oldest.pressure,
