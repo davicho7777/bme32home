@@ -67,3 +67,5 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Neo-brutalism styles will be applied inline via Tailwind utility classes in components. */

@@ -16,10 +16,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/sensor-data/route.js"
     ],
-    "/calendar/page": [
+    "/esp32/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/calendar/page.js"
+      "static/chunks/app/esp32/page.js"
     ]
   }
 }
