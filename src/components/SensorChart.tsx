@@ -1,7 +1,7 @@
 "use client";
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { format } from 'date-fns';
+import { format, addMinutes } from 'date-fns';
 
 interface SensorData {
   id?: string;
@@ -19,10 +19,9 @@ interface SensorChartProps {
   color: string;
   unit: string;
   timeRange: '10m' | '1h' | '6h' | '24h' | '7d' | '30d' | '365d';
-  neo?: boolean;
 }
 
-export default function SensorChart({ data, dataKey, title, color, unit, timeRange, neo = false }: SensorChartProps) {
+export default function SensorChart({ data, dataKey, title, color, unit, timeRange }: SensorChartProps) {
   // Determinar minutos según el rango seleccionado
   let timeRangeMinutes = 60;
   switch (timeRange) {
@@ -49,34 +48,23 @@ export default function SensorChart({ data, dataKey, title, color, unit, timeRan
   else if (timeRange === '30d') step = 720;
   else if (timeRange === '365d') step = 1440;
 
-  // Generar los puntos del eje X (ticks) numéricos en ms para escala de tiempo
-  const ticks: number[] = [];
+  // Generar los puntos del eje X (ticks) aunque no haya datos
+  const ticks: string[] = [];
   let t = new Date(startTime);
   while (t <= endTime) {
-    ticks.push(t.getTime());
+    ticks.push(t.toISOString());
     t = new Date(t.getTime() + step * 60 * 1000);
   }
 
-  // Mapear lecturas a la resolución del minuto para que coincidan exactamente con los ticks
-  const minuteKey = (d: Date) => format(d, "yyyy-MM-dd'T'HH:mm");
-  const dataMap = new Map<string, SensorData>(
-    data.map((d: SensorData) => [minuteKey(new Date(d.timestamp)), d])
-  );
-
-  // Construir datos del gráfico usando un valor X numérico (ts) para alineación perfecta
-  const chartData = ticks.map((ts) => {
-    const key = minuteKey(new Date(ts));
-    const found = dataMap.get(key);
-    if (found) {
-      // Usar el tick exacto como valor X para alinear el punto con el eje
-      return { ...found, ts } as any;
-    }
-    return { ts } as any;
+  // Mezclar los datos reales con los ticks vacíos, dejando huecos (connectNulls=false)
+  const dataMap = new Map(data.map((d: SensorData) => [format(new Date(d.timestamp), "yyyy-MM-dd'T'HH:mm"), d]));
+  const chartData = ticks.map(ts => {
+    const key = format(new Date(ts), "yyyy-MM-dd'T'HH:mm");
+    return dataMap.get(key) || { timestamp: ts };
   });
 
-  const formatTime = (value: number | string) => {
-    const date = typeof value === 'number' ? new Date(value) : new Date(value);
-    return format(date, timeRangeMinutes >= 1440 ? 'dd/MM HH:mm' : 'HH:mm');
+  const formatTime = (timestamp: string) => {
+    return format(new Date(timestamp), timeRangeMinutes >= 1440 ? 'dd/MM HH:mm' : 'HH:mm');
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -96,21 +84,14 @@ export default function SensorChart({ data, dataKey, title, color, unit, timeRan
   };
 
   return (
-    <div className={
-      neo
-        ? "bg-white p-6 border-2 border-black rounded-none shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
-        : "bg-white rounded-lg shadow-md p-6 border border-gray-200"
-    }>
+    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis
-              dataKey="ts"
-              type="number"
-              scale="time"
-              domain={[startTime.getTime(), endTime.getTime()]}
+              dataKey="timestamp"
               tickFormatter={formatTime}
               stroke="#666"
               fontSize={12}

@@ -26,7 +26,6 @@ export default function Dashboard() {
   const [isConnected, setIsConnected] = useState(false)
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<TimeRange>('6h')
-  const [neo, setNeo] = useState<boolean>(true)
 
   const [showCsvMenu, setShowCsvMenu] = useState<boolean>(false)
   const [csvLoading, setCsvLoading] = useState<boolean>(false)
@@ -163,11 +162,7 @@ export default function Dashboard() {
               {/* Botón de descarga CSV */}
               <div className="relative">
                 <button
-                  className={
-                    neo
-                      ? "relative inline-flex items-center gap-2 px-4 py-2 font-semibold border-2 border-black rounded-none select-none bg-yellow-300 text-black hover:bg-yellow-200 shadow-[4px_4px_0_0_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
-                      : "flex items-center gap-1 px-3 py-2 rounded-md bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition font-medium"
-                  }
+                  className="flex items-center gap-1 px-3 py-2 rounded-md bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition font-medium"
                   onClick={() => setShowCsvMenu(v => !v)}
                   disabled={csvLoading}
                   title="Descargar CSV"
@@ -191,53 +186,33 @@ export default function Dashboard() {
                 )}
               </div>
               <Link href="/calendar">
-                <button className={
-                  neo
-                    ? "relative inline-flex items-center gap-2 px-4 py-2 font-semibold border-2 border-black rounded-none select-none bg-blue-300 text-black hover:bg-blue-200 shadow-[4px_4px_0_0_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
-                    : "flex items-center gap-1 px-3 py-2 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 transition font-medium"
-                }>
+                <button className="flex items-center gap-1 px-3 py-2 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 transition font-medium">
                   <CalendarIcon className="w-4 h-4" />
                   Calendario
                 </button>
               </Link>
               <Link href="/esp32">
-                <button className={
-                  neo
-                    ? "relative inline-flex items-center gap-2 px-4 py-2 font-semibold border-2 border-black rounded-none select-none bg-green-300 text-black hover:bg-green-200 shadow-[4px_4px_0_0_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
-                    : "flex items-center gap-1 px-3 py-2 rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition font-medium"
-                }>
+                <button className="flex items-center gap-1 px-3 py-2 rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition font-medium">
                   <span className="font-bold">ESP32</span>
                 </button>
               </Link>
-              {/* Toggle diseño */}
-              <button
-                onClick={() => setNeo(v => !v)}
-                className={
-                  neo
-                    ? "relative inline-flex items-center gap-2 px-4 py-2 font-semibold border-2 border-black rounded-none select-none bg-white text-black hover:bg-gray-100 shadow-[4px_4px_0_0_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
-                    : "flex items-center gap-1 px-3 py-2 rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 transition font-medium"
-                }
-                title={neo ? 'Volver al diseño original' : 'Activar neo brutalismo'}
-              >
-                {neo ? 'Diseño original' : 'Neo brutalismo'}
-              </button>
               {/* Rango de tiempo */}
-              <div className={neo ? "hidden md:flex items-center p-1 border-2 border-black rounded-none bg-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]" : "hidden md:flex items-center bg-white rounded-lg border border-gray-200 p-1"}>
+              <div className="hidden md:flex items-center bg-white rounded-lg border border-gray-200 p-1">
                 {rangeButtons.map(({ key, label }) => (
                   <button
                     key={key}
                     onClick={() => setTimeRange(key)}
-                    className={
-                      neo
-                        ? `px-3 py-1.5 text-sm font-semibold border-2 border-black rounded-none transition-colors ${timeRange === key ? 'bg-blue-400 text-black' : 'bg-white text-black hover:bg-gray-100'}`
-                        : `px-3 py-1.5 text-sm rounded-md transition-colors ${timeRange === key ? 'bg-blue-600 text-white shadow' : 'text-gray-700 hover:bg-gray-100'}`
-                    }
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                      timeRange === key
+                        ? 'bg-blue-600 text-white shadow'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                   >
                     {label}
                   </button>
                 ))}
               </div>
-              <DeviceStatus isConnected={isConnected} lastUpdate={(filteredChrono[filteredChrono.length - 1] ?? latestData)?.timestamp} neo={neo} />
+              <DeviceStatus isConnected={isConnected} lastUpdate={(filteredChrono[filteredChrono.length - 1] ?? latestData)?.timestamp} />
             </div>
           </div>
           {/* Rango de tiempo (mobile) */}
@@ -257,11 +232,7 @@ export default function Dashboard() {
         {/* Última actualización */}
         {(filteredChrono.length > 0 || latestData) && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className={
-              neo
-                ? "bg-white border-2 border-black rounded-none shadow-[6px_6px_0_0_rgba(0,0,0,1)] p-4 flex flex-col items-center justify-center"
-                : "bg-blue-50 border border-blue-200 rounded-lg shadow p-4 flex flex-col items-center justify-center"
-            }>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg shadow p-4 flex flex-col items-center justify-center">
               <span className="text-xs text-blue-700 font-semibold uppercase tracking-wider mb-1">Última actualización</span>
               <span className="text-lg font-bold text-blue-900">{format(new Date((filteredChrono[filteredChrono.length - 1] ?? latestData)!.timestamp), 'dd/MM/yyyy HH:mm:ss')}</span>
             </div>
@@ -274,7 +245,6 @@ export default function Dashboard() {
                   icon={Thermometer}
                   color="text-red-500"
                   bgColor="bg-red-50"
-                  neo={neo}
                 />
                 <StatsCard
                   title="Humedad"
@@ -283,7 +253,6 @@ export default function Dashboard() {
                   icon={Droplets}
                   color="text-blue-500"
                   bgColor="bg-blue-50"
-                  neo={neo}
                 />
                 <StatsCard
                   title="Presión"
@@ -292,15 +261,10 @@ export default function Dashboard() {
                   icon={Gauge}
                   color="text-green-500"
                   bgColor="bg-green-50"
-                  neo={neo}
                 />
               </>
             ) : (
-              <div className={
-                neo
-                  ? "md:col-span-3 bg-white border-2 border-black rounded-none shadow-[6px_6px_0_0_rgba(0,0,0,1)] p-4 flex items-center gap-3"
-                  : "md:col-span-3 bg-yellow-50 border border-yellow-200 rounded-lg shadow p-4 flex items-center gap-3"
-              }>
+              <div className="md:col-span-3 bg-yellow-50 border border-yellow-200 rounded-lg shadow p-4 flex items-center gap-3">
                 <AlertTriangle className="w-5 h-5 text-yellow-600" />
                 <div>
                   <div className="text-sm font-semibold text-yellow-800">Sin datos válidos en el rango seleccionado</div>
@@ -344,7 +308,6 @@ export default function Dashboard() {
             color="#ef4444"
             unit="°C"
             timeRange={timeRange}
-            neo={neo}
           />
           <SensorChart
             data={filteredChrono}
@@ -353,7 +316,6 @@ export default function Dashboard() {
             color="#3b82f6"
             unit="%"
             timeRange={timeRange}
-            neo={neo}
           />
         </div>
 
@@ -365,7 +327,6 @@ export default function Dashboard() {
             color="#10b981"
             unit="hPa"
             timeRange={timeRange}
-            neo={neo}
           />
         </div>
 
