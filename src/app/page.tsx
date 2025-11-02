@@ -166,12 +166,12 @@ export default function Dashboard() {
             <div className="flex flex-wrap items-center gap-3">
               {/* Botón de cambio de tema */}
               <button
-                className={`flex-shrink-0 w-[92px] sm:w-[110px] md:w-[130px] px-3 py-2 rounded-md font-bold border-2 transition-all duration-200 text-sm leading-tight flex items-center justify-center ${isNeo ? 'neo-btn-active' : isCyber ? 'cyber-btn-active' : isCozy ? 'cozy-btn-active' : 'bg-gray-100 text-gray-900'}`}
+                className={`flex-shrink-0 w-[92px] sm:w-[110px] md:w-[130px] px-3 py-2 rounded-md font-bold border-2 transition-all duration-200 leading-tight flex items-center justify-center ${isNeo ? 'neo-btn-active' : isCyber ? 'cyber-btn-active' : isCozy ? 'cozy-btn-active' : 'bg-gray-100 text-gray-900'}`}
                 onClick={toggleTheme}
                 title="Cambiar tema"
-                style={{height: '40px'}}
+                style={{height: '40px'}} 
               >
-                <span className="truncate w-full block text-center">
+                <span className={`truncate w-full block text-center ${isNeo ? 'text-[11px] sm:text-xs' : theme === 'default' ? 'text-xs' : 'text-sm'}`}>
                   {theme === 'default' ? 'Predeterminado' : isNeo ? 'Neo Brutalismo' : isCyber ? 'Cyberpunk' : isCozy ? 'Cozy' : ''}
                 </span>
               </button>
