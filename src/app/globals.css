@@ -1,3 +1,415 @@
+/* --- Cozy 3D effect for chart cards --- */
+/* Más 3D para cozy chart cards */
+.cozy-3d {
+  box-shadow:
+    0 16px 48px 0 rgba(120, 80, 60, 0.22),
+    0 2.5px 0 0 #e6d3c6,
+    0 1.5px 0 0 #fff,
+    0 0 0 6px #f3e8ff44;
+  border-radius: 1.25rem;
+  border: 2.5px solid #e6d3c6;
+  background: linear-gradient(180deg, #fffefa 70%, #f3e8ff 100%);
+  position: relative;
+  z-index: 1;
+}
+.cozy-3d::after {
+  content: "";
+  position: absolute;
+  left: 18px; right: 18px; bottom: 12px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, #e6d3c6 0%, #fff0 80%);
+  opacity: 0.18;
+  z-index: -1;
+}
+.cozy-3d-inner {
+  background: linear-gradient(180deg, #fff 80%, #f3e8ff 100%);
+  border-radius: 1.05rem;
+  margin: 1.1rem 0.9rem 0.9rem 0.9rem;
+  box-shadow:
+    0 6px 32px 0 rgba(120, 80, 60, 0.13),
+    0 1.5px 0 0 #fff;
+  padding: 1.25rem 1.1rem 1.1rem 1.1rem;
+  border: 1.5px solid #e6d3c6;
+  position: relative;
+  z-index: 2;
+}
+.cozy-3d-inner::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0; height: 18px;
+  border-radius: 1.05rem 1.05rem 0 0;
+  background: linear-gradient(180deg, #f3e8ff88 0%, #fff0 100%);
+  opacity: 0.7;
+  z-index: 3;
+}
+@media (max-width: 768px) {
+  .cozy-3d-inner { padding: 0.8rem 0.5rem 0.8rem 0.5rem; margin: 0.5rem; border-radius: 0.7rem; }
+  .cozy-3d { border-radius: 0.8rem; }
+}
+@media (max-width: 480px) {
+  .cozy-3d-inner { padding: 0.5rem; margin: 0.2rem; border-radius: 0.5rem; }
+  .cozy-3d { border-radius: 0.5rem; }
+}
+@media (max-width: 768px) {
+  .cozy-3d-inner { padding: 0.7rem 0.6rem 0.7rem 0.6rem; margin: 0.4rem; }
+  .cozy-3d { border-radius: 0.7rem; }
+}
+@media (max-width: 480px) {
+  .cozy-3d-inner { padding: 0.5rem; margin: 0.2rem; }
+  .cozy-3d { border-radius: 0.5rem; }
+}
+/* Sombra negra de 4px para cartas principales en modo neo */
+.neo-card-shadow-4 {
+  box-shadow: 2px 2px 0 #000000;
+}
+/* Sombra muy pequeña para botones de rango de tiempo en modo neo */
+.neo-tiny-shadow {
+  box-shadow: 2px 2px 0 #000000;
+}
+/* --- Neo Brutalismo --- */
+.neo-bg {
+  background: #a17bff !important;
+}
+
+/* Reglas de sombra doble: primer "halo" brillante cercano, sombra negra más fuerte desplazada */
+.neo-shadow-double {
+  /* amarillo cercano + negro más lejano */
+  box-shadow: 6px 6px 0 #fff700, 14px 14px 0 #000000;
+}
+
+/* Card/contendedor neo: borde negro grueso, radio redondeado y sombra doble */
+.neo-card {
+  background: #ffffff;
+  border: 2px solid #000000 !important;
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  /* sombra simple hacia abajo-derecha (reducida) */
+  box-shadow: 6px 6px 0 #000000;
+  color: #111 !important;
+}
+.neo-card-red { /* colored stripe as background so black border stays in front */
+  background-image: linear-gradient(to right, #ff3b3b 0 6px, transparent 6px);
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+.neo-card-blue {
+  background-image: linear-gradient(to right, #3b82ff 0 6px, transparent 6px);
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+.neo-card-green {
+  background-image: linear-gradient(to right, #10b981 0 6px, transparent 6px);
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+.neo-card-yellow {
+  background-image: linear-gradient(to right, #fff700 0 6px, transparent 6px);
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+
+/* Botones neo: fondo plano, borde negro, sombra doble y radio */
+.neo-btn {
+  background: #fff700;
+  color: #111;
+  border: 2px solid #000000;
+  border-radius: 0.6rem;
+  /* sombra negra simple hacia abajo-derecha (reducida) */
+  box-shadow: 6px 6px 0 #000000;
+}
+.neo-btn-active {
+  background: #111111;
+  color: #fff700;
+  border: 2px solid #000000;
+  border-radius: 0.6rem;
+  box-shadow: 6px 6px 0 #000000;
+}
+.neo-btn-yellow { background: #fff700; color: #111 }
+.neo-btn-blue { background: #3b82ff; color: #fff }
+.neo-btn-green { background: #10b981; color: #fff }
+.neo-btn-gray { background: #e5e7eb; color: #111 }
+
+/* Range-specific smaller buttons for Neo (avoid large 6px shadow on each small button) */
+.neo-range-btn {
+  background: #fff700;
+  color: #111;
+  border: 2px solid #000000;
+  border-radius: 0.45rem;
+  box-shadow: 2px 2px 0 #000000;
+}
+.neo-range-btn-active {
+  background: #111111;
+  color: #fff700;
+  border: 2px solid #000000;
+  border-radius: 0.45rem;
+  box-shadow: 2px 2px 0 #000000;
+}
+
+/* Dropdowns / selects / rangos */
+.neo-dropdown, .neo-range, .neo-select {
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 0.6rem;
+  box-shadow: 6px 6px 0 #000000;
+  color: #111 !important;
+}
+
+/* Etiquetas y textos pequeños: mantener tipografía limpia (sin sombras de texto agresivas) */
+.neo-label { color: #111; font-weight: 700; }
+.neo-label-blue { color: #3b82ff; }
+.neo-label-red { color: #ff3b3b; }
+.neo-label-green { color: #10b981; }
+.neo-label-yellow { color: #fff700; }
+
+/* Clases de color rápido para textos */
+.neo-text-red { color: #ff3b3b !important; }
+.neo-text-blue { color: #3b82ff !important; }
+.neo-text-green { color: #10b981 !important; }
+.neo-text-yellow { color: #fff700 !important; }
+
+/* --- Cyberpunk theme --- */
+.cyber-bg {
+  background: linear-gradient(120deg, #0f0c29 0%, #302b63 50%, #1f1c2c 100%);
+  color: #e6f7ff;
+}
+
+.cyber-glow {
+  text-shadow: 0 0 6px rgba(255,0,255,0.9), 0 0 12px rgba(0,255,255,0.6);
+}
+
+.cyber-card {
+  background: linear-gradient(180deg, rgba(10,10,30,0.9), rgba(20,15,40,0.95));
+  border: 2px solid rgba(0,255,240,0.9);
+  border-radius: 0.5rem;
+  color: #e6f7ff;
+}
+
+.cyber-card-shadow-4 {
+  /* small black offset + neon outer glow */
+  box-shadow: 4px 4px 0 #000000, 0 0 10px rgba(255,0,255,0.18), 0 0 24px rgba(0,255,240,0.12);
+}
+
+.cyber-btn {
+  background: rgba(10,10,30,0.95);
+  color: #00fff0;
+  border: 2px solid rgba(255,0,255,0.9);
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(255,0,255,0.12);
+}
+.cyber-btn-active {
+  background: linear-gradient(90deg,#1b003f,#2a0066);
+  color: #fff;
+  border: 2px solid rgba(0,255,240,0.95);
+  box-shadow: 0 4px 18px rgba(0,255,240,0.12), 0 0 8px rgba(255,0,255,0.08) inset;
+}
+
+.cyber-dropdown, .cyber-range, .cyber-select {
+  background: rgba(10,10,30,0.95);
+  border: 2px solid rgba(0,255,240,0.9);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,255,240,0.06);
+}
+
+.cyber-tiny-shadow { box-shadow: 2px 2px 0 #000000, 0 0 6px rgba(0,255,240,0.12); }
+
+/* Range-specific smaller buttons for Cyberpunk */
+.cyber-range-btn {
+  background: rgba(10,10,30,0.95);
+  color: #00fff0;
+  border: 2px solid rgba(255,0,255,0.9);
+  border-radius: 0.45rem;
+  box-shadow: 2px 2px 0 #000000, 0 0 6px rgba(0,255,240,0.08);
+}
+.cyber-range-btn-active {
+  background: linear-gradient(90deg,#1b003f,#2a0066);
+  color: #fff;
+  border: 2px solid rgba(0,255,240,0.95);
+  border-radius: 0.45rem;
+  box-shadow: 2px 2px 0 #000000, 0 0 8px rgba(0,255,240,0.10);
+}
+
+.cyber-text-magenta { color: #ff00ff !important; }
+.cyber-text-cyan { color: #00fff0 !important; }
+/* --- Cozy (image-inspired autumnal cafe pastels) --- */
+.cozy-bg {
+  /* warm cream -> soft almond */
+  background: linear-gradient(180deg, #fbf2e8 0%, #f8e9de 100%);
+  color: #2b2b2b;
+}
+
+.cozy-glow {
+  /* subtle warm ambient glow */
+  box-shadow: 0 8px 20px rgba(209,115,66,0.04);
+}
+
+.cozy-card {
+  background: linear-gradient(180deg, #fffefa, #fffaf6);
+  border: 1px solid rgba(209,115,66,0.06);
+  border-radius: 0.75rem;
+  color: #2b2b2b;
+  /* fabric overlay container (only for cozy theme) */
+  position: relative;
+  overflow: hidden;
+}
+.cozy-card-shadow { box-shadow: 0 8px 18px rgba(20,20,20,0.05); }
+
+/* Stripes inspired by the image: sunflower, terracotta, sage, pale tile */
+.cozy-card-red { background-image: linear-gradient(to right, #ffdf9a 0 6px, transparent 6px); } /* warm sunflower/mustard */
+.cozy-card-blue { background-image: linear-gradient(to right, #d8e9dd 0 6px, transparent 6px); } /* soft sage */
+.cozy-card-green { background-image: linear-gradient(to right, #fde8df 0 6px, transparent 6px); } /* pale terracotta */
+.cozy-card-yellow { background-image: linear-gradient(to right, #f6edd9 0 6px, transparent 6px); } /* pale tile */
+
+.cozy-btn {
+  background: #fff8f4;
+  color: #3b2f2f;
+  border: 1px solid rgba(150,90,50,0.10);
+  border-radius: 0.6rem;
+  box-shadow: 0 3px 8px rgba(20,20,20,0.03);
+}
+.cozy-btn-active { background: #ffd9b8; color: #7a3b1a; border: 1px solid rgba(150,90,50,0.16); box-shadow: 0 8px 18px rgba(150,90,50,0.04); }
+.cozy-btn-yellow { background: #ffea9a; color: #6b4b00 }
+.cozy-btn-blue { background: #e6f3ea; color: #3b6f55 }
+.cozy-btn-green { background: #fff0ea; color: #7a4a33 }
+
+.cozy-range-btn {
+  background: #fff6f1;
+  color: #3b2f2f;
+  border: 1px solid rgba(150,90,50,0.08);
+  border-radius: 0.45rem;
+  box-shadow: 1px 1px 0 rgba(150,90,50,0.03);
+}
+.cozy-range-btn-active { background: #ffd9b8; color: #7a3b1a; border: 1px solid rgba(150,90,50,0.12); box-shadow: 1px 1px 0 rgba(150,90,50,0.05); }
+
+.cozy-dropdown, .cozy-range, .cozy-select {
+  background: #fff8f4;
+  border: 1px solid rgba(150,90,50,0.06);
+  border-radius: 0.6rem;
+  box-shadow: 0 8px 18px rgba(150,90,50,0.03);
+  color: #2b2b2b !important;
+}
+.cozy-tiny-shadow { box-shadow: 1px 1px 0 rgba(150,90,50,0.03); }
+
+/* --- Animated autumnal fabric only for cozy cards --- */
+.cozy-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: 12px 12px, 12px 12px;
+  /* warm diagonal weave pickup */
+  background-image: repeating-linear-gradient(45deg, rgba(150,90,50,0.06) 0 3px, transparent 3px 6px), repeating-linear-gradient(-45deg, rgba(245,230,210,0.03) 0 3px, transparent 3px 6px);
+  mix-blend-mode: multiply;
+  opacity: 0.06;
+  transform: translateZ(0);
+  will-change: background-position;
+  animation: cozy-fabric-slow 10s linear infinite;
+}
+
+.cozy-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), inset 0 -6px 20px rgba(0,0,0,0.03);
+  border-radius: inherit;
+}
+
+@keyframes cozy-fabric-slow {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 24px 24px, -24px -24px; }
+}
+
+/* disable the animated overlay on very small screens to reduce GPU work */
+@media (max-width: 480px) {
+  .cozy-card::before { display: none; }
+}
+
+/* --- Cozy layout: emulate image card (pastel, framed inner panel, avatar) --- */
+.cozy-card {
+  /* soften border and add soft outer shadow for the card frame */
+  border: 1px solid rgba(139,103,119,0.12);
+  box-shadow: 0 10px 20px rgba(60,40,50,0.04);
+}
+
+.cozy-card .cozy-inner {
+  /* inner framed panel similar to the example: slightly inset with rounded inner box */
+  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(250,245,242,0.96));
+  border-radius: 0.6rem;
+  padding: 1rem;
+  margin: 0.4rem;
+  border: 1px solid rgba(200,160,140,0.06);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.6), inset 0 -6px 18px rgba(0,0,0,0.02);
+}
+
+.cozy-card .cozy-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.cozy-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg,#ffd9b8,#fff0ea);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(150,90,50,0.08);
+  box-shadow: 0 4px 10px rgba(150,90,50,0.04);
+}
+
+.cozy-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #6b4b63; /* pastel plum */
+  letter-spacing: 0.6px;
+}
+
+.cozy-subtitle {
+  font-size: 0.85rem;
+  color: #7b5a5a;
+  opacity: 0.9;
+}
+
+.cozy-body {
+  margin-top: 0.6rem;
+  background: rgba(246,238,230,0.6);
+  border-radius: 0.5rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(200,160,140,0.06);
+  color: #4a3a3a;
+}
+
+/* top-right mini-icons bar (if used in markup) */
+.cozy-card .cozy-icons {
+  margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* small rounded tabs at top (visual flourish) - implemented as a subtle top-left notch using gradient layer */
+.cozy-card {
+  background-image: radial-gradient(circle at 36px 12px, rgba(180,140,120,0.08) 0 22px, transparent 24px), linear-gradient(180deg, #fffefa, #fffaf6);
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: 72px 36px, cover;
+}
+
+@media (max-width: 768px) {
+  .cozy-avatar { width: 44px; height: 44px; }
+  .cozy-title { font-size: 1rem; }
+  .cozy-inner { padding: 0.75rem; margin: 0.3rem; }
+}
+
+@media (max-width: 480px) {
+  .cozy-inner { padding: 0.6rem; }
+  .cozy-body { padding: 0.5rem; }
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -66,4 +478,59 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Responsive adjustments: reduce shadow offsets, paddings and stripe width on smaller viewports */
+@media (max-width: 768px) {
+  /* Reduce heavy offsets so shadows don't dominate small screens */
+  .neo-card, .neo-dropdown, .neo-range, .neo-select, .neo-btn, .neo-btn-active {
+    box-shadow: 3px 3px 0 #000000;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+  }
+
+  /* Reduce stripe width so it doesn't take too much real estate */
+  .neo-card-red { background-image: linear-gradient(to right, #ff3b3b 0 4px, transparent 4px); }
+  .neo-card-blue { background-image: linear-gradient(to right, #3b82ff 0 4px, transparent 4px); }
+  .neo-card-green { background-image: linear-gradient(to right, #10b981 0 4px, transparent 4px); }
+  .neo-card-yellow { background-image: linear-gradient(to right, #fff700 0 4px, transparent 4px); }
+
+  .neo-range-btn, .neo-range-btn-active, .neo-tiny-shadow {
+    box-shadow: 1px 1px 0 #000000;
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.35rem;
+    font-size: 0.85rem;
+  }
+
+  .cyber-card-shadow-4 {
+    box-shadow: 2px 2px 0 #000000, 0 0 6px rgba(255,0,255,0.12), 0 0 14px rgba(0,255,240,0.08);
+  }
+  .cyber-tiny-shadow, .cyber-range-btn, .cyber-range-btn-active { box-shadow: 1px 1px 0 #000000, 0 0 4px rgba(0,255,240,0.06); }
+}
+
+@media (max-width: 480px) {
+  /* Extra compact: smaller shadows, smaller stripes */
+  .neo-card, .neo-dropdown, .neo-range, .neo-select, .neo-btn, .neo-btn-active {
+    box-shadow: 1px 1px 0 #000000;
+    padding: 0.4rem;
+    border-radius: 0.4rem;
+  }
+  .neo-card-red { background-image: linear-gradient(to right, #ff3b3b 0 3px, transparent 3px); }
+  .neo-card-blue { background-image: linear-gradient(to right, #3b82ff 0 3px, transparent 3px); }
+  .neo-card-green { background-image: linear-gradient(to right, #10b981 0 3px, transparent 3px); }
+  .neo-card-yellow { background-image: linear-gradient(to right, #fff700 0 3px, transparent 3px); }
+
+  .neo-range-btn, .neo-range-btn-active, .neo-tiny-shadow { box-shadow: 1px 1px 0 #000000; padding: 0.3rem 0.5rem; font-size: 0.8rem; }
+  .cyber-tiny-shadow, .cyber-range-btn, .cyber-range-btn-active { box-shadow: 1px 1px 0 #000000, 0 0 3px rgba(0,255,240,0.05); }
+
+  /* Make the header controls wrap nicely and use full width on very small screens */
+  .max-w-7xl > .mb-8 .flex-wrap { gap: 0.5rem; }
+}
+
+/* Helpers for custom 550px breakpoint: show dropdown under 550px, show inline buttons above */
+.hide-below-550 { display: flex !important; }
+.show-below-550 { display: none !important; }
+@media (max-width: 550px) {
+  .hide-below-550 { display: none !important; }
+  .show-below-550 { display: block !important; }
 }

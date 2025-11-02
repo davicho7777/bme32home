@@ -21,6 +21,13 @@ interface SensorData {
 type TimeRange = '10m' | '1h' | '6h' | '24h' | '7d' | '30d' | '365d'
 
 export default function Dashboard() {
+  // Estado para el tema: 'default', 'neobrutal', 'cyberpunk' o 'cozy'
+  const [theme, setTheme] = useState<'default' | 'neobrutal' | 'cyberpunk' | 'cozy'>('default')
+  // Ciclo: default -> neobrutal -> cyberpunk -> cozy -> default
+  const toggleTheme = () => setTheme(t => t === 'default' ? 'neobrutal' : t === 'neobrutal' ? 'cyberpunk' : t === 'cyberpunk' ? 'cozy' : 'default')
+  const isNeo = theme === 'neobrutal'
+  const isCyber = theme === 'cyberpunk'
+  const isCozy = theme === 'cozy'
   const [sensorData, setSensorData] = useState<SensorData[]>([])
   const [latestData, setLatestData] = useState<SensorData | null>(null)
   const [isConnected, setIsConnected] = useState(false)
@@ -147,22 +154,31 @@ export default function Dashboard() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+  <div className={`min-h-screen p-4 transition-all duration-300 ${isNeo ? 'neo-bg' : isCyber ? 'cyber-bg' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Dashboard BME280</h1>
-              <p className="text-gray-600 mt-1">
-                Monitoreo en tiempo real del sensor ambiental
-              </p>
+              <p className="mt-1 text-gray-600">Monitoreo en tiempo real del sensor ambiental</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Botón de cambio de tema */}
+              <button
+                className={`flex-shrink-0 w-[92px] sm:w-[110px] md:w-[130px] px-3 py-2 rounded-md font-bold border-2 transition-all duration-200 leading-tight flex items-center justify-center ${isNeo ? 'neo-btn-active' : isCyber ? 'cyber-btn-active' : isCozy ? 'cozy-btn-active' : 'bg-gray-100 text-gray-900'}`}
+                onClick={toggleTheme}
+                title="Cambiar tema"
+                style={{height: '40px'}} 
+              >
+                <span className={`truncate w-full block text-center ${isNeo ? 'text-[11px] sm:text-xs' : theme === 'default' ? 'text-xs' : 'text-sm'}`}>
+                  {theme === 'default' ? 'Predeterminado' : isNeo ? 'Neo Brutalismo' : isCyber ? 'Cyberpunk' : isCozy ? 'Cozy' : ''}
+                </span>
+              </button>
               {/* Botón de descarga CSV */}
               <div className="relative">
                 <button
-                  className="flex items-center gap-1 px-3 py-2 rounded-md bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition font-medium"
+                  className={`flex-shrink-0 flex items-center gap-1 px-3 py-2 rounded-md transition font-medium ${isNeo ? 'neo-btn neo-btn-yellow' : isCyber ? 'cyber-btn cyber-btn-yellow' : isCozy ? 'cozy-btn cozy-btn-yellow' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'}`}
                   onClick={() => setShowCsvMenu(v => !v)}
                   disabled={csvLoading}
                   title="Descargar CSV"
@@ -171,11 +187,11 @@ export default function Dashboard() {
                   CSV
                 </button>
                 {showCsvMenu && (
-                  <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded shadow z-10 min-w-[120px]">
+                  <div className={`absolute right-0 mt-2 z-10 min-w-[120px] ${isNeo ? 'neo-dropdown' : isCyber ? 'cyber-dropdown' : isCozy ? 'cozy-dropdown' : 'bg-white border border-gray-200 rounded shadow'}`}>
                     {rangeButtons.map(({ key, label }) => (
                       <button
                         key={key}
-                        className="block w-full text-left px-4 py-2 hover:bg-yellow-50 text-sm"
+                        className={`block w-full text-left px-4 py-2 text-sm ${isNeo ? 'neo-btn neo-btn-yellow' : isCyber ? 'cyber-btn cyber-btn-yellow' : isCozy ? 'cozy-btn cozy-btn-yellow' : 'hover:bg-yellow-50'}`}
                         onClick={() => handleDownloadCsv(key)}
                         disabled={csvLoading}
                       >
@@ -186,41 +202,43 @@ export default function Dashboard() {
                 )}
               </div>
               <Link href="/calendar">
-                <button className="flex items-center gap-1 px-3 py-2 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 transition font-medium">
+                <button className={`flex-shrink-0 flex items-center gap-1 px-3 py-2 rounded-md transition font-medium ${isNeo ? 'neo-btn neo-btn-blue' : isCyber ? 'cyber-btn cyber-btn-blue' : isCozy ? 'cozy-btn cozy-btn-blue' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`}>
                   <CalendarIcon className="w-4 h-4" />
                   Calendario
                 </button>
               </Link>
               <Link href="/esp32">
-                <button className="flex items-center gap-1 px-3 py-2 rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition font-medium">
-                  <span className="font-bold">ESP32</span>
+                <button className={`flex-shrink-0 flex items-center gap-1 px-3 py-2 rounded-md font-bold transition font-medium ${isNeo ? 'neo-btn neo-btn-green' : isCyber ? 'cyber-btn cyber-btn-green' : isCozy ? 'cozy-btn cozy-btn-green' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}>
+                  <span>ESP32</span>
                 </button>
               </Link>
-              {/* Rango de tiempo */}
-              <div className="hidden md:flex items-center bg-white rounded-lg border border-gray-200 p-1">
-                {rangeButtons.map(({ key, label }) => (
-                  <button
-                    key={key}
-                    onClick={() => setTimeRange(key)}
-                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                      timeRange === key
-                        ? 'bg-blue-600 text-white shadow'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <DeviceStatus isConnected={isConnected} lastUpdate={(filteredChrono[filteredChrono.length - 1] ?? latestData)?.timestamp} />
+              
+                <div className={`hide-below-550 items-center rounded-lg p-1 ${isNeo ? 'neo-range' : isCyber ? 'cyber-range' : isCozy ? 'cozy-range' : 'bg-white border border-gray-200'}`}>
+                  {rangeButtons.map(({ key, label }) => (
+                      <button
+                        key={key}
+                        onClick={() => setTimeRange(key)}
+                        className={`px-3 py-1.5 text-sm rounded-md transition-colors font-bold ${isNeo
+                          ? (timeRange === key ? 'neo-range-btn-active neo-btn-yellow neo-tiny-shadow' : 'neo-range-btn neo-btn-yellow neo-tiny-shadow')
+                          : isCyber
+                            ? (timeRange === key ? 'cyber-range-btn-active cyber-btn-yellow cyber-tiny-shadow' : 'cyber-range-btn cyber-btn-yellow cyber-tiny-shadow')
+                            : isCozy
+                              ? (timeRange === key ? 'cozy-range-btn-active cozy-btn-yellow cozy-tiny-shadow' : 'cozy-range-btn cozy-btn-yellow cozy-tiny-shadow')
+                              : (timeRange === key ? 'bg-yellow-600 text-white shadow' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200')}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                </div>
+              <DeviceStatus theme={theme} isConnected={isConnected} lastUpdate={(filteredChrono[filteredChrono.length - 1] ?? latestData)?.timestamp} />
             </div>
           </div>
           {/* Rango de tiempo (mobile) */}
-          <div className="mt-4 md:hidden">
+          <div className="mt-4 show-below-550">
             <select
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value as TimeRange)}
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 ${theme === 'neobrutal' ? 'neo-select' : theme === 'cozy' ? 'cozy-select' : 'border border-gray-300 bg-white focus:ring-blue-500'}`}
             >
               {rangeButtons.map(({ key, label }) => (
                 <option key={key} value={key}>{label}</option>
@@ -232,9 +250,9 @@ export default function Dashboard() {
         {/* Última actualización */}
         {(filteredChrono.length > 0 || latestData) && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg shadow p-4 flex flex-col items-center justify-center">
-              <span className="text-xs text-blue-700 font-semibold uppercase tracking-wider mb-1">Última actualización</span>
-              <span className="text-lg font-bold text-blue-900">{format(new Date((filteredChrono[filteredChrono.length - 1] ?? latestData)!.timestamp), 'dd/MM/yyyy HH:mm:ss')}</span>
+            <div className={`rounded-lg p-4 flex flex-col items-center justify-center ${theme === 'neobrutal' ? 'neo-card neo-card-blue neo-card-shadow-4' : theme === 'cyberpunk' ? 'cyber-card cyber-card-shadow-4' : theme === 'cozy' ? 'cozy-card cozy-card-blue cozy-card-shadow' : 'bg-blue-50 border border-blue-200 shadow'}`}>
+              <span className={`text-xs font-semibold uppercase tracking-wider mb-1 ${theme === 'cyberpunk' ? 'cyber-text-cyan' : 'text-blue-700'}`}>Última actualización</span>
+              <span className={`text-lg font-bold ${theme === 'cyberpunk' ? 'cyber-text-magenta' : 'text-blue-900'}`}>{format(new Date((filteredChrono[filteredChrono.length - 1] ?? latestData)!.timestamp), 'dd/MM/yyyy HH:mm:ss')}</span>
             </div>
             {filteredChrono.length > 0 ? (
               <>
@@ -243,32 +261,38 @@ export default function Dashboard() {
                   value={filteredChrono[filteredChrono.length - 1]!.temperature}
                   unit="°C"
                   icon={Thermometer}
-                  color="text-red-500"
-                  bgColor="bg-red-50"
+                  color={theme === 'cyberpunk' ? 'cyber-text-magenta' : 'text-red-500'}
+                  bgColor={theme === 'cyberpunk' ? 'bg-[#1b003f]' : 'bg-red-50'}
+                  theme={theme}
+                  className={theme === 'neobrutal' ? 'neo-card-shadow-4' : theme === 'cyberpunk' ? 'cyber-card-shadow-4' : theme === 'cozy' ? 'cozy-card-shadow' : ''}
                 />
                 <StatsCard
                   title="Humedad"
                   value={filteredChrono[filteredChrono.length - 1]!.humidity}
                   unit="%"
                   icon={Droplets}
-                  color="text-blue-500"
-                  bgColor="bg-blue-50"
+                  color={theme === 'cyberpunk' ? 'cyber-text-cyan' : 'text-blue-500'}
+                  bgColor={theme === 'cyberpunk' ? 'bg-[#18132a]' : 'bg-blue-50'}
+                  theme={theme}
+                  className={theme === 'neobrutal' ? 'neo-card-shadow-4' : theme === 'cyberpunk' ? 'cyber-card-shadow-4' : theme === 'cozy' ? 'cozy-card-shadow' : ''}
                 />
                 <StatsCard
                   title="Presión"
                   value={filteredChrono[filteredChrono.length - 1]!.pressure}
                   unit="hPa"
                   icon={Gauge}
-                  color="text-green-500"
-                  bgColor="bg-green-50"
+                  color={theme === 'cyberpunk' ? 'cyber-text-cyan' : 'text-green-500'}
+                  bgColor={theme === 'cyberpunk' ? 'bg-[#18132a]' : 'bg-green-50'}
+                  theme={theme}
+                  className={theme === 'neobrutal' ? 'neo-card-shadow-4' : theme === 'cyberpunk' ? 'cyber-card-shadow-4' : theme === 'cozy' ? 'cozy-card-shadow' : ''}
                 />
               </>
             ) : (
-              <div className="md:col-span-3 bg-yellow-50 border border-yellow-200 rounded-lg shadow p-4 flex items-center gap-3">
-                <AlertTriangle className="w-5 h-5 text-yellow-600" />
+              <div className={`md:col-span-3 rounded-lg shadow p-4 flex items-center gap-3 ${theme === 'neobrutal' ? 'neo-card neo-card-yellow' : theme === 'cyberpunk' ? 'cyber-card cyber-card-shadow-4' : theme === 'cozy' ? 'cozy-card cozy-card-yellow cozy-card-shadow' : 'bg-yellow-50 border border-yellow-200'}`}>
+                <AlertTriangle className={`w-5 h-5 ${theme === 'cyberpunk' ? 'cyber-text-magenta' : 'text-yellow-600'}`} />
                 <div>
-                  <div className="text-sm font-semibold text-yellow-800">Sin datos válidos en el rango seleccionado</div>
-                  <div className="text-xs text-yellow-800/80">Algunas lecturas fueron descartadas por ser atípicas (outliers). Ajusta el rango o revisa el sensor.</div>
+                  <div className={`text-sm font-semibold ${theme === 'cyberpunk' ? 'cyber-text-magenta' : 'text-yellow-800'}`}>Sin datos válidos en el rango seleccionado</div>
+                  <div className={`text-xs ${theme === 'cyberpunk' ? 'cyber-text-cyan' : 'text-yellow-800/80'}`}>Algunas lecturas fueron descartadas por ser atípicas (outliers). Ajusta el rango o revisa el sensor.</div>
                 </div>
               </div>
             )}
@@ -278,23 +302,23 @@ export default function Dashboard() {
         {/* Análisis de datos */}
         {analysis && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-              <h3 className="font-semibold mb-2 text-red-600 flex items-center gap-2"><Thermometer className="w-4 h-4" /> Temperatura</h3>
-              <div className="text-sm">Promedio: <b>{analysis.temperature.avg.toFixed(2)}°C</b></div>
-              <div className="text-sm">Mínimo: <b>{analysis.temperature.min.toFixed(2)}°C</b></div>
-              <div className="text-sm">Máximo: <b>{analysis.temperature.max.toFixed(2)}°C</b></div>
+            <div className={`rounded-lg p-4 border flex flex-col ${theme === 'neobrutal' ? 'neo-card neo-card-red border-black neo-card-shadow-4' : theme === 'cyberpunk' ? 'cyber-card cyber-card-shadow-4' : theme === 'cozy' ? 'cozy-card cozy-card-red cozy-card-shadow' : 'bg-white border-gray-200 shadow'}`}>
+              <h3 className={`font-semibold mb-2 flex items-center gap-2 ${theme === 'cyberpunk' ? 'cyber-text-magenta' : 'text-red-600'}`}><Thermometer className="w-4 h-4" /> Temperatura</h3>
+              <div className={`text-sm ${theme === 'cyberpunk' ? 'cyber-text-cyan' : ''}`}>Promedio: <b>{analysis.temperature.avg.toFixed(2)}°C</b></div>
+              <div className={`text-sm ${theme === 'cyberpunk' ? 'cyber-text-cyan' : ''}`}>Mínimo: <b>{analysis.temperature.min.toFixed(2)}°C</b></div>
+              <div className={`text-sm ${theme === 'cyberpunk' ? 'cyber-text-cyan' : ''}`}>Máximo: <b>{analysis.temperature.max.toFixed(2)}°C</b></div>
             </div>
-            <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-              <h3 className="font-semibold mb-2 text-blue-600 flex items-center gap-2"><Droplets className="w-4 h-4" /> Humedad</h3>
-              <div className="text-sm">Promedio: <b>{analysis.humidity.avg.toFixed(2)}%</b></div>
-              <div className="text-sm">Mínimo: <b>{analysis.humidity.min.toFixed(2)}%</b></div>
-              <div className="text-sm">Máximo: <b>{analysis.humidity.max.toFixed(2)}%</b></div>
+            <div className={`rounded-lg p-4 border flex flex-col ${theme === 'neobrutal' ? 'neo-card neo-card-blue border-black neo-card-shadow-4' : theme === 'cyberpunk' ? 'cyber-card cyber-card-shadow-4' : theme === 'cozy' ? 'cozy-card cozy-card-blue cozy-card-shadow' : 'bg-white border-gray-200 shadow'}`}>
+              <h3 className={`font-semibold mb-2 flex items-center gap-2 ${theme === 'cyberpunk' ? 'cyber-text-magenta' : 'text-blue-600'}`}><Droplets className="w-4 h-4" /> Humedad</h3>
+              <div className={`text-sm ${theme === 'cyberpunk' ? 'cyber-text-cyan' : ''}`}>Promedio: <b>{analysis.humidity.avg.toFixed(2)}%</b></div>
+              <div className={`text-sm ${theme === 'cyberpunk' ? 'cyber-text-cyan' : ''}`}>Mínimo: <b>{analysis.humidity.min.toFixed(2)}%</b></div>
+              <div className={`text-sm ${theme === 'cyberpunk' ? 'cyber-text-cyan' : ''}`}>Máximo: <b>{analysis.humidity.max.toFixed(2)}%</b></div>
             </div>
-            <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-              <h3 className="font-semibold mb-2 text-green-600 flex items-center gap-2"><Gauge className="w-4 h-4" /> Presión</h3>
-              <div className="text-sm">Promedio: <b>{analysis.pressure.avg.toFixed(2)} hPa</b></div>
-              <div className="text-sm">Mínimo: <b>{analysis.pressure.min.toFixed(2)} hPa</b></div>
-              <div className="text-sm">Máximo: <b>{analysis.pressure.max.toFixed(2)} hPa</b></div>
+            <div className={`rounded-lg p-4 border flex flex-col ${theme === 'neobrutal' ? 'neo-card neo-card-green border-black neo-card-shadow-4' : theme === 'cyberpunk' ? 'cyber-card cyber-card-shadow-4' : theme === 'cozy' ? 'cozy-card cozy-card-green cozy-card-shadow' : 'bg-white border-gray-200 shadow'}`}>
+              <h3 className={`font-semibold mb-2 flex items-center gap-2 ${theme === 'cyberpunk' ? 'cyber-text-magenta' : 'text-green-600'}`}><Gauge className="w-4 h-4" /> Presión</h3>
+              <div className={`text-sm ${theme === 'cyberpunk' ? 'cyber-text-cyan' : ''}`}>Promedio: <b>{analysis.pressure.avg.toFixed(2)} hPa</b></div>
+              <div className={`text-sm ${theme === 'cyberpunk' ? 'cyber-text-cyan' : ''}`}>Mínimo: <b>{analysis.pressure.min.toFixed(2)} hPa</b></div>
+              <div className={`text-sm ${theme === 'cyberpunk' ? 'cyber-text-cyan' : ''}`}>Máximo: <b>{analysis.pressure.max.toFixed(2)} hPa</b></div>
             </div>
           </div>
         )}
@@ -305,17 +329,19 @@ export default function Dashboard() {
             data={filteredChrono}
             dataKey="temperature"
             title="Temperatura"
-            color="#ef4444"
+            color={theme === 'neobrutal' ? '#ff3b3b' : '#ef4444'}
             unit="°C"
             timeRange={timeRange}
+            theme={theme}
           />
           <SensorChart
             data={filteredChrono}
             dataKey="humidity"
             title="Humedad"
-            color="#3b82f6"
+            color={theme === 'neobrutal' ? '#3b82ff' : '#3b82f6'}
             unit="%"
             timeRange={timeRange}
+            theme={theme}
           />
         </div>
 
@@ -324,9 +350,10 @@ export default function Dashboard() {
             data={filteredChrono}
             dataKey="pressure"
             title="Presión Atmosférica"
-            color="#10b981"
+            color={theme === 'neobrutal' ? '#10b981' : '#10b981'}
             unit="hPa"
             timeRange={timeRange}
+            theme={theme}
           />
         </div>
 
