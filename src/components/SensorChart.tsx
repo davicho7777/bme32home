@@ -19,9 +19,10 @@ interface SensorChartProps {
   color: string;
   unit: string;
   timeRange: '10m' | '1h' | '6h' | '24h' | '7d' | '30d' | '365d';
+  theme?: 'default' | 'neobrutal' | 'cyberpunk' | 'cozy';
 }
 
-export default function SensorChart({ data, dataKey, title, color, unit, timeRange }: SensorChartProps) {
+export default function SensorChart({ data, dataKey, title, color, unit, timeRange, theme = 'default' }: SensorChartProps) {
   // Determinar minutos según el rango seleccionado
   let timeRangeMinutes = 60;
   switch (timeRange) {
@@ -70,11 +71,19 @@ export default function SensorChart({ data, dataKey, title, color, unit, timeRan
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-md">
-          <p className="text-sm text-gray-600">
+        <div className={
+          theme === 'cyberpunk'
+            ? 'bg-[#18132a] border border-cyan-400 rounded-lg shadow-md p-3'
+            : theme === 'neobrutal'
+              ? 'bg-white p-3 border border-black rounded-lg shadow-md'
+              : theme === 'cozy'
+                ? 'bg-white p-3 border border-[#efd9ff] rounded-lg shadow-sm'
+                : 'bg-white p-3 border border-gray-200 rounded-lg shadow-md'
+        }>
+          <p className={`text-sm ${theme === 'cyberpunk' ? 'cyber-text-cyan' : 'text-gray-600'}`}>
             {format(new Date(label), 'dd/MM HH:mm')}
           </p>
-          <p className="font-medium" style={{ color: color }}>
+          <p className={`font-medium ${theme === 'cyberpunk' ? 'cyber-text-magenta' : ''}`} style={theme === 'cyberpunk' ? {} : { color: color }}>
             {`${title}: ${payload[0].value !== undefined ? payload[0].value.toFixed(1) : '--'} ${unit}`}
           </p>
         </div>
@@ -83,39 +92,87 @@ export default function SensorChart({ data, dataKey, title, color, unit, timeRan
     return null;
   };
 
+  let cardClass = 'rounded-lg p-6 ';
+  if (theme === 'neobrutal') {
+    cardClass += 'neo-card border-black neo-card-shadow-4 ';
+  } else if (theme === 'cyberpunk') {
+    cardClass += 'cyber-card cyber-card-shadow-4 ';
+  } else if (theme === 'cozy') {
+    cardClass += 'cozy-card cozy-card-shadow cozy-3d ';
+  } else {
+    cardClass += 'bg-white border border-gray-200 shadow ';
+  }
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis
-              dataKey="timestamp"
-              tickFormatter={formatTime}
-              stroke="#666"
-              fontSize={12}
-              ticks={ticks}
-              minTickGap={0}
-            />
-            <YAxis
-              stroke="#666"
-              fontSize={12}
-              domain={['dataMin - 1', 'dataMax + 1']}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Line
-              type="monotone"
-              dataKey={dataKey}
-              stroke={color}
-              strokeWidth={2}
-              dot={{ fill: color, strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: color, strokeWidth: 2 }}
-              connectNulls={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+    <div className={cardClass}>
+      {theme === 'cozy' ? (
+        <div className="cozy-inner cozy-3d-inner">
+          <h3 className="text-lg font-semibold mb-4 cozy-title">{title}</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f3e8ff" />
+                <XAxis
+                  dataKey="timestamp"
+                  tickFormatter={formatTime}
+                  stroke="#8b5cf6"
+                  fontSize={12}
+                  ticks={ticks}
+                  minTickGap={0}
+                />
+                <YAxis
+                  stroke="#8b5cf6"
+                  fontSize={12}
+                  domain={['dataMin - 1', 'dataMax + 1']}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey={dataKey}
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#8b5cf6', strokeWidth: 2 }}
+                  connectNulls={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h3 className={`text-lg font-semibold mb-4 ${theme === 'cyberpunk' ? 'cyber-text-magenta' : 'text-gray-900'}`}>{title}</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke={theme === 'cyberpunk' ? '#2af5ff33' : '#f0f0f0'} />
+                <XAxis
+                  dataKey="timestamp"
+                  tickFormatter={formatTime}
+                  stroke={theme === 'cyberpunk' ? '#00fff0' : '#666'}
+                  fontSize={12}
+                  ticks={ticks}
+                  minTickGap={0}
+                />
+                <YAxis
+                  stroke={theme === 'cyberpunk' ? '#00fff0' : '#666'}
+                  fontSize={12}
+                  domain={['dataMin - 1', 'dataMax + 1']}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey={dataKey}
+                  stroke={theme === 'cyberpunk' ? '#ff00ff' : color}
+                  strokeWidth={2}
+                  dot={{ fill: theme === 'cyberpunk' ? '#ff00ff' : color, strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: theme === 'cyberpunk' ? '#ff00ff' : color, strokeWidth: 2 }}
+                  connectNulls={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </>
+      )}
     </div>
   );
 }
